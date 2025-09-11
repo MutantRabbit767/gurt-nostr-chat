@@ -4,9 +4,8 @@
     
 </head>
 
-<body>
-    <h1 style="text-3xl font-bold text-center">Welcome to Gurted!</h1>
-    <p style="text-lg text-center">A new way to the web (ᵔᴥᵔ)</p>
+<body style="bg-black">
+    <h1 style="text-3xl font-bold text-center font-mono">Welcome to Gurted!</h1>
 </body>
 
 <script>
