@@ -1,0 +1,158 @@
+<head>
+    <title>decentralized chat</title>
+    <icon src="https://cdn1.iconfinder.com/data/icons/social-messaging-ui-color/254000/46-512.png">
+    <style>
+        body { font-mono }
+    </style>
+</head>
+
+<body style="bg-black">
+    <div id="entermenu" style="hidden flex flex-col gap-2 border-[#4FD23B] border-2 w-full mx-full mt-1/2">
+         <h1 style="text-[#4FD23B] text-3xl font-bold text-center font-mono mt-8">sussybaka.fent</h1>
+         <h1 style="text-white text-xl font-bold text-center font-mono mx-3">the soon to be anonymous and decentralized chat on Gurted.</h1>
+         <h1 id="enter" style="text-white text-xl font-bold text-center font-mono mb-8">Enter -></h1>
+    </div>
+    <div style="inline-flex justify-between w-full text-[#22ff00] border-[#22ff00] p-5">
+        <div style="inline-flex gap-6">
+            <p style="">sussybaka.fent</p>
+            <p id="identifier" style="text-left text-sm">identifier:</p>
+        </div>
+        <p style="bg-white border-[#22ff00]">#sussy</p>
+    </div>
+    <div style="h-full border-[#22ff00] text-white flex-inline flex-col w-full">
+        <div id="messages" style="h-full p-5 flex-inline flex-row">
+            <div id="pointer"></div>
+        </div>
+        <form style="">
+            <input id="messageinput" placeholder="message" style="px-5 border-t border-[#22ff00] text-[#22ff00] w-full h-16">
+        </form>
+    </div>
+</body>
+
+<script>
+    local shouldI = true
+    function ShowMessage(text) 
+        if shouldI then
+            local messageElement = gurt.create('p', { text = text, style="text-orange-500" })
+            local messagesDiv = gurt.select("#messages")
+            messagesDiv:append(messageElement)
+            setTimeout(function() shouldI = true end, 100)
+            shouldI = false
+        end
+    end
+
+    function signnote(event, secretkey)
+        local response = fetch ('gurt://moviethingy.xyz/generatesignature', {
+            method = "GET",
+            body = JSON.stringify({
+                event = string.gsub(JSON.stringify(event), '(%d+)%.0([^%d])', '%1%2'),
+                privkey = secretkey
+            })
+        })
+
+        if response:ok() then
+            return response:json()
+
+        else
+            trace.log('Request failed with status: ' .. response.status)
+        end
+    end
+
+    function SendMessage (webSocket, publickey, secretkey, message, identifier) 
+        local noteToPost = message
+        local time = Time.now()
+
+        local eventObject = {
+            pubkey = publickey,
+            created_at = time,
+            kind = 1,
+            tags = {{"-"}},
+            content = noteToPost
+        }
+
+        local eventArray = {
+            0,
+            publickey,
+            time,
+            1,
+            {{"-"}},
+            noteToPost
+        }
+
+        local signRes = signnote(eventArray, secretkey)
+        local id = signRes[1]
+        local signature = signRes[2]
+
+        eventObject.id = id
+        eventObject.sig = signature
+
+        trace.log("id: " .. id)
+        trace.log("signature: " .. signature)
+
+        webSocket:send(string.gsub(JSON.stringify({"EVENT", eventObject}), '(%d+)%.0([^%d])', '%1%2'))
+
+        
+    end
+
+    local relays = {'ws://localhost:4869', 'wss://moviethingy.xyz', 'wss://relay.damus.io', 'wss://offchain.pub', 'wss://chorus.pjv.me', 'wss://bostr.shop', 'wss://black.nostrcity.club', 'wss://alien.macneilmediagroup.com', 'wss://articles.layer3.news', 'wss://a.nos.lol', 'wss://bucket.coracle.social', 'wss://relay.primal.net', 'wss://bostr.syobon.net', 'wss://communities.nos.social', 'wss://bostr.bitcointxoko.com', 'wss://adre.su', 'wss://nos.lol', 'wss://relay.mostro.network', 'wss://nostr.thebiglake.org', 'wss://cyberspace.nostr1.com', 'wss://relay.nostriot.com', 'wss://relay.wellorder.net', 'wss://nostr.l484.com', 'wss://nostr.red5d.dev', 'wss://nostr.mom', 'wss://relay.evanverma.com', 'wss://nostr.spaceshell.xyz', 'wss://relay.zone667.com', 'wss://khatru.nostrver.se', 'wss://relay.letsfo.com', 'wss://nostr-relay.online', 'wss://relay.cosmicbolt.net', 'wss://relay.magiccity.live', 'wss://nostr.tavux.tech', 'wss://premium.primal.net', 'wss://nostr-relay.moe.gift', 'wss://nostr-03.dorafactory.org', 'wss://nostr.sathoarder.com', 'wss://nostr-relay.schnitzel.world', 'wss://relay.vrtmrz.net', 'wss://relay.mwaters.net', 'wss://portal-relay.pareto.space', 'wss://srtrelay.c-stellar.net', 'wss://relay.siamdev.cc', 'wss://relay.holzeis.me', 'wss://relay.angor.io', 'wss://nostr.novacisko.cz', 'wss://orangesync.tech', 'wss://nostr-rs-relay-ishosta.phamthanh.me', 'wss://dev-nostr.bityacht.io', 'wss://nostr.fbxl.net', 'wss://slick.mjex.me', 'wss://relay.mccormick.cx', 'wss://nostr.slothy.win', 'wss://purplerelay.com', 'wss://relay.usefusion.ai', 'wss://relay01.lnfi.network', 'wss://relay.orangepill.ovh', 'wss://relay.conduit.market', 'wss://nostr.rikmeijer.nl', 'wss://nostr.easydns.ca', 'wss://nostrelites.org', 'wss://nostr.lojong.info', 'wss://strfry.bonsai.com', 'wss://nostr.notribe.net', 'wss://nostr-relay.cbrx.io', 'wss://nostr.plantroon.com', 'wss://relay.barine.co', 'wss://orangepiller.org', 'wss://nostr-relay-1.trustlessenterprise.com', 'wss://nostr.rohoss.com', 'wss://relay-testnet.k8s.layer3.news', 'wss://relay02.lnfi.network', 'wss://nostr.tadryanom.me', 'wss://relay-dev.satlantis.io', 'wss://nostr.oxtr.dev', 'wss://nostr-01.yakihonne.com', 'wss://nostr.hekster.org', 'wss://nostr.blankfors.se', 'wss://nostr.liberty.fans', 'wss://relay.javi.space', 'wss://nostr.namek.link', 'wss://relay.bitcoinartclock.com', 'wss://nostr.21crypto.ch', 'wss://relay.varke.eu', 'wss://nostr.kungfu-g.rip', 'wss://relay.21e6.cz', 'wss://relay.nsnip.io', 'wss://nostr-relay.zimage.com', 'wss://knostr.neutrine.com', 'wss://relay.nostrcheck.me', 'wss://strfry.openhoofd.nl', 'wss://gnostr.com', 'wss://nostr.azzamo.net', 'wss://relay.nostx.io', 'wss://rn1.sotiras.org', 'wss://relay.sigit.io', 'wss://relay.wavlake.com', 'wss://relay.mattybs.lol', 'wss://relay1.nostrchat.io', 'wss://pyramid.fiatjaf.com', 'wss://nostr.hoppe-relay.it.com', 'wss://relay.freeplace.nl', 'wss://relay04.lnfi.network', 'wss://relay.goodmorningbitcoin.com', 'wss://nostr-relay.psfoundation.info', 'wss://relay.wavefunc.live', 'wss://relay.copylaradio.com', 'wss://nostr-pub.wellorder.net', 'wss://nostr.coincards.com', 'wss://relay-rpi.edufeed.org', 'wss://relay.chakany.systems', 'wss://nostr.coincrowd.fund', 'wss://nostr.rtvslawenia.com', 'wss://relay.coinos.io', 'wss://nostr.hifish.org', 'wss://kitchen.zap.cooking', 'wss://relay.utxo.farm', 'wss://nostr.satstralia.com', 'wss://relay.nostromo.social', 'wss://librerelay.aaroniumii.com', 'wss://relay.nostr.com.au', 'wss://schnorr.me', 'wss://soloco.nl', 'wss://relay.netstr.io', 'wss://relay.oldenburg.cool', 'wss://nostr.2b9t.xyz', 'wss://nostrelay.memory-art.xyz', 'wss://relay.arx-ccn.com', 'wss://relay.nostrdice.com', 'wss://nostr-1.nbo.angani.co', 'wss://relay.13room.space', 'wss://relay.tapestry.ninja', 'wss://nostr.rblb.it', 'wss://nostr.prl.plus', 'wss://relay.verified-nostr.com', 'wss://dev-relay.lnfi.network', 'wss://r.bitcoinhold.net', 'wss://relay-admin.thaliyal.com', 'wss://relay.toastr.net', 'wss://relay.mess.ch', 'wss://nostr.agentcampfire.com', 'wss://relay.jeffg.fyi', 'wss://relay.davidebtc.me', 'wss://nostr.carroarmato0.be', 'wss://relay.g1sms.fr', 'wss://prl.plus', 'wss://relay.nostr.wirednet.jp', 'wss://relay.hodl.ar', 'wss://relay03.lnfi.network', 'wss://nostr.excentered.com', 'wss://fanfares.nostr1.com', 'wss://nostr.thaliyal.com', 'wss://nostr.einundzwanzig.space', 'wss://relay.chorus.community', 'wss://nostr.night7.space', 'wss://relay.credenso.cafe', 'wss://relay.digitalezukunft.cyou', 'wss://relay.anzenkodo.workers.dev', 'wss://noxir.kpherox.dev', 'wss://nostr-rs-relay.dev.fedibtc.com', 'wss://relay.dwadziesciajeden.pl', 'wss://freelay.sovbit.host', 'wss://relay.nostrhub.fr', 'wss://relay5.bitransfer.org', 'wss://inbox.azzamo.net', 'wss://no.str.cr', 'wss://nostr.4rs.nl', 'wss://nostr.stakey.net', 'wss://relay.lexingtonbitcoin.org', 'wss://nostr.zenon.network', 'wss://relay.getsafebox.app', 'wss://relay.nosto.re', 'wss://relay.nostr.band', 'wss://relay.hivetalk.org', 'wss://relay.degmods.com', 'wss://relay.puresignal.news', 'wss://relay.tagayasu.xyz', 'wss://relay.illuminodes.com', 'wss://relay.bitcoinveneto.org', 'wss://satsage.xyz', 'wss://nostr.dbtc.link', 'wss://nostr.overmind.lol', 'wss://relay.hasenpfeffr.com', 'wss://nostr.now', 'wss://nostr-verif.slothy.win', 'wss://relay.ru.ac.th', 'wss://relay.bullishbounty.com', 'wss://nostr.makibisskey.work'}
+
+    local response = fetch ("gurt://moviethingy.xyz/generatenostrid")
+    trace.log("finished i think")
+    if response:ok() then
+        local res = response:json()
+        local publickey = res[1]
+        local secretkey = res[2]
+
+        local identifier = string.sub(publickey, 1, 10)
+        local identifierText = gurt.select("#identifier")
+        identifierText.text = identifierText.text .. " " .. identifier
+
+        
+        setTimeout(function()
+            for i, relay in pairs(relays) do
+                local ws = WebSocket.new(relay)
+                ws:on('open', function()
+                    local inputField = gurt.select('#messageinput')
+                    print('connected to: ' .. relay)
+                    inputField:on('keydown', function(event)
+                        print(event.key)
+                        if event.key == "Enter" and inputField.value and inputField.value ~= ''  then
+                            inputField.value = ""
+                            ShowMessage("<@" .. identifier .. "> " .. inputField.value)
+                            SendMessage(ws, publickey, secretkey, inputField.value, identifier)
+
+                        end
+                    end)
+                end)
+                
+                ws:on('message', function(data)
+                    trace.log('Received: ' .. data)
+                end)
+    
+                ws:on('error', function(error)
+                    trace.log('WebSocket error: ' .. error)
+                end)
+    
+                ws:on('close', function(code, reason)
+                    trace.log('WebSocket closed: ' .. code .. ' - ' .. reason)
+                end)
+            end
+        end, 3)
+
+
+        trace.log('Public key: ' .. res[1])
+        trace.log('Secret key: ' .. res[2])
+    else
+        trace.log('Request failed with status: ' .. response.status)
+    end
+
+    local enterButton = gurt.select('#enter')
+    local enterMenu = gurt.select('#entermenu')
+    
+    enterButton:on('mouseenter', function()
+        enterButton:on('mousedown', function()
+            enterMenu:remove()
+        end)
+    end)
+    
+</script>
