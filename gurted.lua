@@ -13,7 +13,7 @@
         local response = fetch ('gurt://localhost/generatesignature', {
             method = "GET",
             body = JSON.stringify({
-                event = string.gsub(JSON.stringify(event), '(%d+)%.0([^%d])', '%1%2'),
+                event = string.gsub(JSON.stringify(event), '(%d+)%.0([^%d])', '%1%2'), -- gets rid of the floatingn point issue when stringifying JSON
                 privkey = secretkey
             })
         })
