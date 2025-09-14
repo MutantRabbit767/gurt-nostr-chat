@@ -81,7 +81,7 @@
                 local style = "text-orange-500"
                 if recieved then 
                     if msgIdentifier == identifier then return end -- temporary fix for double script running
-                    style = "text-blue-500" 
+                    style = "text-[#" .. string.sub(msgIdentifier, 1, 6) .. "]" 
                 end
                 local messageElement = gurt.create('p', { text = text, style = style })
                 -- changed temporarily until bug gets fix with :append() being merged
