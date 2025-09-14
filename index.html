@@ -146,9 +146,10 @@
                     table.insert(sockets, ws)
                     print('connected to: ' .. relay)
                 end)
-                
+                print("state:")
+                print(WebSocket)
                 ws:on('message', function(data)
-                    trace.log('Received: ' .. data)
+                    trace.log(data)
                 end)
                 
                 ws:on('error', function(error)
