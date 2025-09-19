@@ -4,6 +4,8 @@ this is the first itteration of my decentralized Nostr chat appplication for Flu
 ## Media
 Here's a demonstration of the chat application.
 
+![gif](https://github.com/user-attachments/assets/4cd8bcee-fb82-4cc4-89d9-2c9d746036aa)
+
 You can visit it yourself on the [Flumi](https://www.gurted.com/download) browser at `gurt://sussybaka.fent`.
 
 ## Contributions
